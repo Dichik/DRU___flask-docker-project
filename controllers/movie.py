@@ -51,7 +51,11 @@ def add_movie():
     """
     data = get_request_data()
     try:
-        new_record = Movie.create(data)
+        if 'name' not in data.keys() or 'year' not in data.keys() or 'genre' not in data.keys():
+            err = 'Could not add new record cause of missed field'
+            return make_response(jsonify(error=err), 400)
+
+        new_record = Movie.create(**data)
         new_movie = {k: v for k, v in new_record.__dict__.items() if k in MOVIE_FIELDS}
         return make_response(jsonify(new_movie), 200)
     except:
@@ -73,7 +77,21 @@ def update_movie():
 
         exists = Movie.query.filter_by(id=row_id).first() is not None
         if exists:
-            upd_record = Movie.update(row_id, data)
+
+            allowed = {'id', 'name', 'genre', 'year'}
+            for key in data.keys():
+                if key not in allowed:
+                    err = 'Id must be integer'
+                    return make_response(jsonify(error=err), 400)
+
+            if 'year' in data.keys():
+                try:
+                    int(data['year'])
+                except:
+                    err = 'Year must be integer'
+                    return make_response(jsonify(error=err), 400)
+
+            upd_record = Movie.update(row_id, **data)
             upd_movie = {k: v for k, v in upd_record.__dict__.items() if k in MOVIE_FIELDS}
             return make_response(jsonify(upd_movie), 200)
         else:
@@ -95,6 +113,10 @@ def delete_movie():
             row_id = int(data['id'])
         except:
             err = 'Id must be integer'
+            return make_response(jsonify(error=err), 400)
+
+        if Movie.query.filter_by(id=row_id).first() is None:
+            err = 'Id does not exist'
             return make_response(jsonify(error=err), 400)
 
         Movie.query.filter_by(id=row_id).delete()

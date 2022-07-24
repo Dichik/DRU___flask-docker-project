@@ -4,7 +4,7 @@ from datetime import datetime as dt
 from ast import literal_eval
 
 from models.actor import Actor
-from settings.constants import ACTOR_FIELDS  # to make response pretty
+from settings.constants import ACTOR_FIELDS, DATE_FORMAT  # to make response pretty
 from .parse_request import get_request_data
 
 
@@ -32,8 +32,8 @@ def get_actor_by_id():
             err = 'Id must be integer'
             return make_response(jsonify(error=err), 400)
 
-        obj = Actor.query.filter_by(id=row_id).first()
         try:
+            obj = Actor.query.filter_by(id=row_id).first()
             actor = {k: v for k, v in obj.__dict__.items() if k in ACTOR_FIELDS}
         except:
             err = 'Record with such id does not exist'
@@ -52,7 +52,13 @@ def add_actor():
     """
     data = get_request_data()
     try:
-        new_record = Actor.create(data)
+        if 'name' not in data.keys() or 'gender' not in data.keys() or 'date_of_birth' not in data.keys():
+            err = 'Could not add new record cause of missed field'
+            return make_response(jsonify(error=err), 400)
+
+        dt.strptime(data.get('date_of_birth'), DATE_FORMAT)
+
+        new_record = Actor.create(**data)
         new_actor = {k: v for k, v in new_record.__dict__.items() if k in ACTOR_FIELDS}
         return make_response(jsonify(new_actor), 200)
     except:
@@ -74,7 +80,21 @@ def update_actor():
 
         exists = Actor.query.filter_by(id=row_id).first() is not None
         if exists:
-            upd_record = Actor.update(row_id, data)
+
+            allowed = {'id', 'name', 'gender', 'date_of_birth'}
+            for key in data.keys():
+                if key not in allowed:
+                    err = 'Id must be integer'
+                    return make_response(jsonify(error=err), 400)
+
+            if 'date_of_birth' in data.keys():
+                try:
+                    dt.strptime(data.get('date_of_birth'), DATE_FORMAT)
+                except:
+                    err = 'Date of birthday must be in correct format'
+                    return make_response(jsonify(error=err), 400)
+
+            upd_record = Actor.update(row_id, **data)
             upd_actor = {k: v for k, v in upd_record.__dict__.items() if k in ACTOR_FIELDS}
             return make_response(jsonify(upd_actor), 200)
         else:
@@ -96,6 +116,10 @@ def delete_actor():
             row_id = int(data['id'])
         except:
             err = 'Id must be integer'
+            return make_response(jsonify(error=err), 400)
+
+        if Actor.query.filter_by(id=row_id).first() is None:
+            err = 'Id does not exist'
             return make_response(jsonify(error=err), 400)
 
         Actor.query.filter_by(id=row_id).delete()

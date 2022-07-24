@@ -32,7 +32,9 @@ class Model(object):
         row_id: record id
         kwargs: dict with object parameters
         """
-        obj = cls.query.filter_by(id=row_id).update(**kwargs)
+        obj = cls.query.filter_by(id=row_id).first()
+        for key, value in kwargs.items():
+            setattr(obj, key, value)
         return commit(obj)
 
     @classmethod
