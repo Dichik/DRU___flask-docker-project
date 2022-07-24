@@ -2,9 +2,11 @@ from datetime import datetime as dt
 
 from core import db
 from models.relations import association
+from models.base import Model
 
 
-class Actor(db.Model):
+class Actor(Model, db.Model):
+    __tablename__ = 'actors'
     # id -> integer, primary key
     id = db.Column(db.Integer, primary_key=True)
     # name -> string, size 50, unique, not nullable
@@ -17,7 +19,7 @@ class Actor(db.Model):
     # Use `db.relationship` method to define the Actor's relationship with Movie.
     # Set `backref` as 'cast', uselist=True
     # Set `secondary` as 'association'
-    movies = db.relationship('Movie', secondary=association,  backref='cast', uselist=True)
+    # movies = db.relationship('Movie', secondary=association,  backref='cast', uselist=True)
 
     def __repr__(self):
         return '<Actor {}>'.format(self.name)
