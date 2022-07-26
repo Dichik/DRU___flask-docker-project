@@ -4,6 +4,7 @@ from datetime import datetime as dt
 from ast import literal_eval
 
 from models.actor import Actor
+from models.movie import Movie
 from settings.constants import ACTOR_FIELDS, DATE_FORMAT  # to make response pretty
 from .parse_request import get_request_data
 
@@ -143,7 +144,24 @@ def actor_add_relation():
             err = 'Id must be integer'
             return make_response(jsonify(error=err), 400)
 
-        actor = Actor.add_relation(row_id, data)  # add relation here
+        actor = Actor.query.filter_by(id=row_id).first()
+        if actor is None:
+            err = 'Id doesn\'t exist'
+            return make_response(jsonify(error=err), 400)
+
+        if 'relation_id' not in data.keys():
+            err = 'Relation Id doesn\'t exist'
+            return make_response(jsonify(error=err), 400)
+
+        try:
+            movie_id = int(data['relation_id'])
+        except:
+            err = 'Relation Id must be integer'
+            return make_response(jsonify(error=err), 400)
+
+        movie = Movie.query.filter_by(id=movie_id).first()
+
+        actor = Actor.add_relation(row_id, movie)  # add relation here
         rel_actor = {k: v for k, v in actor.__dict__.items() if k in ACTOR_FIELDS}
         rel_actor['filmography'] = str(actor.filmography)
         return make_response(jsonify(rel_actor), 200)
@@ -163,6 +181,10 @@ def actor_clear_relations():
             row_id = int(data['id'])
         except:
             err = 'Id must be integer'
+            return make_response(jsonify(error=err), 400)
+
+        if Actor.query.filter_by(id=row_id).first() is None:
+            err = 'Id must be correct'
             return make_response(jsonify(error=err), 400)
 
         actor = Actor.clear_relations(row_id)

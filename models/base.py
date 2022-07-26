@@ -46,8 +46,11 @@ class Model(object):
         row_id: record id
         return: int (1 if deleted else 0)
         """
-        obj = cls.query.filter_by(id=row_id).delete()
-        return obj
+        obj = cls.query.filter_by(id=row_id).first()
+        if obj is None:
+            return 0
+        obj.delete()
+        return 1
 
     @classmethod
     def add_relation(cls, row_id, rel_obj):
@@ -74,7 +77,7 @@ class Model(object):
         row_id: record id
         rel_obj: related object
         """
-        obj = cls.query.filter_by(id=row_id)
+        obj = cls.query.filter_by(id=row_id).first()
         if cls.__name__ == 'Actor':
             obj.filmography.delete(rel_obj)
         elif cls.__name__ == 'Movie':

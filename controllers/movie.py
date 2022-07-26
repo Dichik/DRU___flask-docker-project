@@ -2,6 +2,7 @@ from flask import jsonify, make_response
 
 from ast import literal_eval
 
+from models.actor import Actor
 from models.movie import Movie
 from settings.constants import MOVIE_FIELDS
 from .parse_request import get_request_data
@@ -140,7 +141,24 @@ def movie_add_relation():
             err = 'Id must be integer'
             return make_response(jsonify(error=err), 400)
 
-        movie = Movie.add_relation(row_id, data)  # add relation here
+        movie = Movie.query.filter_by(id=row_id).first()
+        if movie is None:
+            err = 'Id doesn\'t exist'
+            return make_response(jsonify(error=err), 400)
+
+        if 'relation_id' not in data.keys():
+            err = 'Relation Id doesn\'t exist'
+            return make_response(jsonify(error=err), 400)
+
+        try:
+            actor_id = int(data['relation_id'])
+        except:
+            err = 'Relation Id must be integer'
+            return make_response(jsonify(error=err), 400)
+
+        actor = Actor.query.filter_by(id=actor_id).first()
+
+        movie = Movie.add_relation(row_id, actor)  # add relation here
         rel_movie = {k: v for k, v in movie.__dict__.items() if k in MOVIE_FIELDS}
         rel_movie['filmography'] = str(movie.filmography)
         return make_response(jsonify(rel_movie), 200)
@@ -160,6 +178,10 @@ def movie_clear_relations():
             row_id = int(data['id'])
         except:
             err = 'Id must be integer'
+            return make_response(jsonify(error=err), 400)
+
+        if Movie.query.filter_by(id=row_id).first() is None:
+            err = 'Id must be correct'
             return make_response(jsonify(error=err), 400)
 
         movie = Movie.clear_relations(row_id)
