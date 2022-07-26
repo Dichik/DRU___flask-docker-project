@@ -20,6 +20,11 @@ class Movie(Model, db.Model):
     # Set `backref` as 'filmography', uselist=True
     # Set `secondary` as 'association'
     # actors = db.relationship('Actor', secondary=association, backref='filmography', uselist=True)
+    actors = db.relationship(
+        "Actor",
+        secondary=association,
+        backref=db.backref('filmography'),
+        uselist=True)
 
     def __repr__(self):
         return '<Movie {}>'.format(self.name)
