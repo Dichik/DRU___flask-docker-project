@@ -1,3 +1,5 @@
+from _testcapi import INT_MAX
+
 from flask import jsonify, make_response
 
 from ast import literal_eval
@@ -157,10 +159,13 @@ def movie_add_relation():
             return make_response(jsonify(error=err), 400)
 
         actor = Actor.query.filter_by(id=actor_id).first()
+        if actor is None:
+            err = 'Actor Id doesn\'t exist'
+            return make_response(jsonify(error=err), 400)
 
         movie = Movie.add_relation(row_id, actor)  # add relation here
         rel_movie = {k: v for k, v in movie.__dict__.items() if k in MOVIE_FIELDS}
-        rel_movie['filmography'] = str(movie.filmography)
+        rel_movie['cast'] = str(movie.cast)
         return make_response(jsonify(rel_movie), 200)
 
     else:
@@ -186,7 +191,7 @@ def movie_clear_relations():
 
         movie = Movie.clear_relations(row_id)
         rel_movie = {k: v for k, v in movie.__dict__.items() if k in MOVIE_FIELDS}
-        rel_movie['filmography'] = str(movie.filmography)
+        rel_movie['cast'] = str(movie.cast)
         return make_response(jsonify(rel_movie), 200)
     else:
         err = 'No id specified'

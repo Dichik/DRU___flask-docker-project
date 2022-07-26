@@ -160,6 +160,9 @@ def actor_add_relation():
             return make_response(jsonify(error=err), 400)
 
         movie = Movie.query.filter_by(id=movie_id).first()
+        if movie is None:
+            err = 'Movie id is wrong'
+            return make_response(jsonify(error=err), 400)
 
         actor = Actor.add_relation(row_id, movie)  # add relation here
         rel_actor = {k: v for k, v in actor.__dict__.items() if k in ACTOR_FIELDS}

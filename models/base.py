@@ -92,7 +92,7 @@ class Model(object):
         cls: class
         row_id: record id
         """
-        obj = cls.query.filter_by(id=row_id)
+        obj = cls.query.filter_by(id=row_id).first()
         if cls.__name__ == 'Actor':
             obj.filmography.clear()
         elif cls.__name__ == 'Movie':
