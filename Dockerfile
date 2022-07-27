@@ -1,12 +1,12 @@
 FROM python:3.7
 
-WORKDIR /DRU___flask-docker-project
+WORKDIR /app
 
 COPY requirements.txt ./
 RUN pip3 install -r requirements.txt
 
 RUN export PYTHONPATH='${PYTHONPATH}:/app'
 
-COPY . .
+COPY app .
 
 CMD ["python", "./run.py"]
