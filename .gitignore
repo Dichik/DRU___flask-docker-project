@@ -1,4 +1,0 @@
-app/venv
-.gitignore
-.pytest_cache
-./postgres-data
