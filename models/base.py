@@ -46,11 +46,16 @@ class Model(object):
         row_id: record id
         return: int (1 if deleted else 0)
         """
-        obj = cls.query.filter_by(id=row_id).first()
-        if obj is None:
-            return 0
-        obj.delete()
-        return 1
+        ans = 1
+        try:
+            if cls.query.filter_by(id=row_id).first() is None:
+                ans = 0
+            else:
+                cls.query.filter_by(id=row_id).delete()
+                db.session.commit()
+        except:
+            ans = 0
+        return ans
 
     @classmethod
     def add_relation(cls, row_id, rel_obj):

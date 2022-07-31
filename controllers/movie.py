@@ -30,15 +30,14 @@ def get_movie_by_id():
             err = 'Id must be integer'
             return make_response(jsonify(error=err), 400)
 
-        obj = Movie.query.filter_by(id=row_id).first()
         try:
+            obj = Movie.query.filter_by(id=row_id).first()
             movie = {k: v for k, v in obj.__dict__.items() if k in MOVIE_FIELDS}
         except:
             err = 'Record with such id does not exist'
             return make_response(jsonify(error=err), 400)
 
         return make_response(jsonify(movie), 200)
-
     else:
         err = 'No id specified'
         return make_response(jsonify(error=err), 400)

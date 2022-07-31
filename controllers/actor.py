@@ -40,7 +40,6 @@ def get_actor_by_id():
             return make_response(jsonify(error=err), 400)
 
         return make_response(jsonify(actor), 200)
-
     else:
         err = 'No id specified'
         return make_response(jsonify(error=err), 400)
