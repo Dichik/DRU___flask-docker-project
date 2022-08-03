@@ -113,11 +113,11 @@ def delete_movie():
             err = 'Id must be integer'
             return make_response(jsonify(error=err), 400)
 
-        if Movie.query.filter_by(id=row_id).first() is None:
+        obj = Movie.delete(row_id)
+        if obj == 0:
             err = 'Id does not exist'
             return make_response(jsonify(error=err), 400)
 
-        Movie.query.filter_by(id=row_id).delete()
         msg = 'Record successfully deleted'
         return make_response(jsonify(message=msg), 200)
 

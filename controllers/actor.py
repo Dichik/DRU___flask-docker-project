@@ -117,11 +117,11 @@ def delete_actor():
             err = 'Id must be integer'
             return make_response(jsonify(error=err), 400)
 
-        if Actor.query.filter_by(id=row_id).first() is None:
+        obj = Actor.delete(row_id)
+        if obj == 0:
             err = 'Id does not exist'
             return make_response(jsonify(error=err), 400)
 
-        Actor.query.filter_by(id=row_id).delete()
         msg = 'Record successfully deleted'
         return make_response(jsonify(message=msg), 200)
 
